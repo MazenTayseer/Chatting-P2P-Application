@@ -9,7 +9,7 @@ import threading
 import time
 import select
 import logging
-
+from getpass4 import getpass
 
 # Server side of peer
 class PeerServer(threading.Thread):
@@ -315,14 +315,14 @@ class peerMain:
             # and password entered by the user
             if choice is "1":
                 username = input("username: ")
-                password = input("password: ")
+                password = getpass("password: ")
                 
                 self.createAccount(username, password)
             # if choice is 2 and user is not logged in, asks for the username
             # and the password to login
             elif choice is "2" and not self.isOnline:
                 username = input("username: ")
-                password = input("password: ")
+                password = getpass("password: ")
                 # asks for the port number for server's tcp socket
                 peerServerPort = int(input("Enter a port number for peer server: "))
                 
