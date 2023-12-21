@@ -137,8 +137,8 @@ class PeerServer(threading.Thread):
                             inputs.append(self.tcpServerSocket)
                             # connected peer ended the chat
                             if len(messageReceived) == 2:
-                                print("User you're chatting with ended the chat")
-                                print("Press enter to quit the chat: ")
+                                print("User you're chatting with , ended the chat")
+                                print("Press enter , to quit the chat: ")
                         # if the message is an empty one, then it means that the
                         # connected user suddenly ended the chat(an error occurred)
                         elif len(messageReceived) == 0:
@@ -310,7 +310,7 @@ class peerMain:
         # as long as the user is not logged out, asks to select an option in the menu
         while choice != "6":
             # menu selection prompt
-            choice = input("Choose: \nCreate account: 1\nLogin: 2\nLogout: 3\nSearch: 4\nStart a chat: 5\n")
+            choice = input("Choose: \nCreate account: 1\nLogin: 2\nLogout: 3\nSearch: 4\nStart a chat: 5\nExit Program : 6")
             # if choice is 1, creates an account with the username
             # and password entered by the user
             if choice == "1":
