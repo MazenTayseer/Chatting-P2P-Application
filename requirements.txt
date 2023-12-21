@@ -1,3 +1,4 @@
 pymongo
 python-dotenv
 getpass4
+colorama
