@@ -137,8 +137,8 @@ class PeerServer(threading.Thread):
                             inputs.append(self.tcpServerSocket)
                             # connected peer ended the chat
                             if len(messageReceived) == 2:
-                                print("User you're chatting with ended the chat")
-                                print("Press enter to quit the chat: ")
+                                print("User you're chatting with , ended the chat")
+                                print("Press enter , to quit the chat: ")
                         # if the message is an empty one, then it means that the
                         # connected user suddenly ended the chat(an error occurred)
                         elif len(messageReceived) == 0:
@@ -310,14 +310,20 @@ class peerMain:
         # as long as the user is not logged out, asks to select an option in the menu
         while choice != "3":
             # menu selection prompt
-            choice = input("Choose: \nCreate account: 1\nLogin: 2\nLogout: 3\nSearch: 4\nStart a chat: 5\n")
+            choice = input("Choose: \nCreate account: 1\nLogin: 2\nLogout: 3\nSearch: 4\nStart a chat: 5\nExit: 6\n")
             # if choice is 1, creates an account with the username
             # and password entered by the user
             if choice == "1":
                 username = input("username: ")
-                password = getpass("password: ")
-                
-                self.createAccount(username, password)
+                while True:
+                    password = getpass("password: ")
+                    confirm_password = getpass("Confirm password: ")
+                    if password == confirm_password:
+                        # Passwords match, create account
+                        self.createAccount(username, password)
+                        break  # Exit the loop since passwords match
+                    else:
+                        print("Invalid: Passwords do not match. Please re-enter Password")                
             # if choice is 2 and user is not logged in, asks for the username
             # and the password to login
             elif choice == "2" and not self.isOnline:
@@ -411,8 +417,9 @@ class peerMain:
         logging.info("Received from " + self.registryName + " -> " + response)
         if response == "join-success":
             print("Account created...")
+            print("Welcome " + username)
         elif response == "join-exist":
-            print("choose another username or login...")
+            print("choose another username or login as this username already exist...")
 
     # login function
     def login(self, username, password):
