@@ -317,6 +317,9 @@ class peerMain:
                 username = input("username: ")
                 while True:
                     password = getpass("password: ")
+                    if len(password) < 8:
+                        print("Invalid: Password must be at least 8 characters long. Please re-enter.")
+                        continue
                     confirm_password = getpass("Confirm password: ")
                     if password == confirm_password:
                         # Passwords match, create account
