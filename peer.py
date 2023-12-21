@@ -321,7 +321,7 @@ class peerMain:
                 while True:
                     password = getpass("password: ")
                     if len(password) < 8:
-                        print("Invalid: Password must be at least 8 characters long. Please re-enter.")
+                        print(Fore.RED + "Invalid: Password must be at least 8 characters long. Please re-enter.")
                         continue
                     confirm_password = getpass("Confirm password: ")
                     if password == confirm_password:
@@ -374,7 +374,7 @@ class peerMain:
             # if choice is 5 and user is online, then user is asked
             # to enter the username of the user that is wanted to be chatted
             elif choice == "4" and not self.isOnline:
-                print("You can't Search , you need to log in first")
+                print(Fore.RED + "You can't Search , you need to log in first")
             elif choice == "5" and self.isOnline:
                 username = input("Enter the username of user to start chat: ")
                 searchStatus = self.searchUser(username)
@@ -387,7 +387,7 @@ class peerMain:
                     self.peerClient.start()
                     self.peerClient.join()
             elif choice == "5" and not self.isOnline:
-                print("You can't chat, you need to log in first")
+                print(Fore.RED + "You can't chat, you need to log in first")
 
             # if this is the receiver side then it will get the prompt to accept an incoming request during the main loop
             # that's why response is evaluated in main process not the server thread even though the prompt is printed by server
@@ -429,7 +429,7 @@ class peerMain:
             print(Fore.GREEN + "Account created...")
             print(Fore.GREEN + "Welcome " + username)
         elif response == "join-exist":
-            print("choose another username or login as this username already exist...")
+            print(Fore.RED + "choose another username or login as this username already exist...")
 
     # login function
     def login(self, username, password):
