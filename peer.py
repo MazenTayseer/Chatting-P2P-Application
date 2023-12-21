@@ -308,7 +308,7 @@ class peerMain:
         # log file initialization
         logging.basicConfig(filename="peer.log", level=logging.INFO)
         # as long as the user is not logged out, asks to select an option in the menu
-        while choice != "6":
+        while choice != "3":
             # menu selection prompt
             choice = input("Choose: \nCreate account: 1\nLogin: 2\nLogout: 3\nSearch: 4\nStart a chat: 5\n")
             # if choice is 1, creates an account with the username
@@ -372,15 +372,6 @@ class peerMain:
                     self.peerClient = PeerClient(searchStatus[0], int(searchStatus[1]) , self.loginCredentials[0], self.peerServer, None)
                     self.peerClient.start()
                     self.peerClient.join()
-
-            elif choice == "6" and self.isOnline:
-                self.logout(1)
-                self.isOnline = False
-                self.loginCredentials = (None, None)
-                self.peerServer.isOnline = False
-                self.peerServer.tcpServerSocket.close()
-                if self.peerClient is not None:
-                    self.peerClient.tcpClientSocket.close()
 
             # if this is the receiver side then it will get the prompt to accept an incoming request during the main loop
             # that's why response is evaluated in main process not the server thread even though the prompt is printed by server
