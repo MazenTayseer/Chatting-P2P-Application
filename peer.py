@@ -10,6 +10,9 @@ import time
 import select
 import logging
 from getpass4 import getpass
+from colorama import init, Fore
+
+init()
 
 # Server side of peer
 class PeerServer(threading.Thread):
@@ -42,7 +45,7 @@ class PeerServer(threading.Thread):
     # main method of the peer server thread
     def run(self):
 
-        print("Peer server started...")    
+        print(Fore.GREEN + "Peer server started...")    
 
         # gets the ip address of this peer
         # first checks to get it for windows devices
@@ -80,7 +83,7 @@ class PeerServer(threading.Thread):
                         # if the user is not chatting, then the ip and the socket of
                         # this peer is assigned to server variables
                         if self.isChatRequested == 0:     
-                            print(self.username + " is connected from " + str(addr))
+                            print(Fore.CYAN + self.username + " is connected from " + str(addr))
                             self.connectedPeerSocket = connected
                             self.connectedPeerIP = addr[0]
                     # if the socket that receives the data is the one that
@@ -137,8 +140,8 @@ class PeerServer(threading.Thread):
                             inputs.append(self.tcpServerSocket)
                             # connected peer ended the chat
                             if len(messageReceived) == 2:
-                                print("User you're chatting with , ended the chat")
-                                print("Press enter , to quit the chat: ")
+                                print("User you're chatting with ended the chat")
+                                print("Press enter to quit the chat: ")
                         # if the message is an empty one, then it means that the
                         # connected user suddenly ended the chat(an error occurred)
                         elif len(messageReceived) == 0:
@@ -179,7 +182,7 @@ class PeerClient(threading.Thread):
 
     # main method of the peer client thread
     def run(self):
-        print("Peer client started...")
+        print(Fore.CYAN + "Peer client started...")
         # connects to the server of other peer
         self.tcpClientSocket.connect((self.ipToConnect, self.portToConnect))
         # if the server of this peer is not connected by someone else and if this is the requester side peer client then enters here
@@ -280,7 +283,7 @@ class peerMain:
     # peer initializations
     def __init__(self):
         # ip address of the registry
-        self.registryName = input("Enter IP address of registry: ")
+        self.registryName = input(Fore.MAGENTA + "Enter IP address of registry: ")
         #self.registryName = 'localhost'
         # port number of the registry
         self.registryPort = 15600
@@ -310,25 +313,28 @@ class peerMain:
         # as long as the user is not logged out, asks to select an option in the menu
         while choice != "3":
             # menu selection prompt
-            choice = input("Choose: \nCreate account: 1\nLogin: 2\nLogout: 3\nSearch: 4\nStart a chat: 5\n")
+            choice = input(Fore.BLUE + "Choose: \nCreate account: 1\nLogin: 2\nLogout: 3\nSearch: 4\nStart a chat: 5\n")
             # if choice is 1, creates an account with the username
             # and password entered by the user
             if choice == "1":
-                username = input("username: ")
+                username = input(Fore.CYAN + "username: ")
                 while True:
                     password = getpass("password: ")
+                    if len(password) < 8:
+                        print("Invalid: Password must be at least 8 characters long. Please re-enter.")
+                        continue
                     confirm_password = getpass("Confirm password: ")
                     if password == confirm_password:
                         # Passwords match, create account
                         self.createAccount(username, password)
                         break  # Exit the loop since passwords match
                     else:
-                        print("Invalid: Passwords do not match. Please re-enter Password")                
+                        print(Fore.RED + "Invalid: Passwords do not match. Please re-enter Password")                
             # if choice is 2 and user is not logged in, asks for the username
             # and the password to login
             elif choice == "2" and not self.isOnline:
-                username = input("username: ")
-                password = getpass("password: ")
+                username = input(Fore.CYAN + "username: ")
+                password = getpass(Fore.CYAN + "password: ")
                 # asks for the port number for server's tcp socket
                 #peerServerPort = int(input("Enter a port number for peer server: "))
                 
@@ -353,7 +359,7 @@ class peerMain:
                 self.peerServer.tcpServerSocket.close()
                 if self.peerClient != None:
                     self.peerClient.tcpClientSocket.close()
-                print("Logged out successfully")
+                print(Fore.GREEN + "Logged out successfully")
             # is peer is not logged in and exits the program
             elif choice == "3":
                 self.logout(2)
@@ -367,6 +373,8 @@ class peerMain:
                     print("IP address of " + username + " is " + searchStatus)
             # if choice is 5 and user is online, then user is asked
             # to enter the username of the user that is wanted to be chatted
+            elif choice == "4" and not self.isOnline:
+                print("You can't Search , you need to log in first")
             elif choice == "5" and self.isOnline:
                 username = input("Enter the username of user to start chat: ")
                 searchStatus = self.searchUser(username)
@@ -378,6 +386,8 @@ class peerMain:
                     self.peerClient = PeerClient(searchStatus[0], int(searchStatus[1]) , self.loginCredentials[0], self.peerServer, None)
                     self.peerClient.start()
                     self.peerClient.join()
+            elif choice == "5" and not self.isOnline:
+                print("You can't chat, you need to log in first")
 
             # if this is the receiver side then it will get the prompt to accept an incoming request during the main loop
             # that's why response is evaluated in main process not the server thread even though the prompt is printed by server
@@ -416,8 +426,8 @@ class peerMain:
         response = self.tcpClientSocket.recv(1024).decode()
         logging.info("Received from " + self.registryName + " -> " + response)
         if response == "join-success":
-            print("Account created...")
-            print("Welcome " + username)
+            print(Fore.GREEN + "Account created...")
+            print(Fore.GREEN + "Welcome " + username)
         elif response == "join-exist":
             print("choose another username or login as this username already exist...")
 
@@ -431,16 +441,16 @@ class peerMain:
         response = self.tcpClientSocket.recv(1024).decode()
         logging.info("Received from " + self.registryName + " -> " + response)
         if response == "login-success":
-            print("Logged in successfully...")
+            print(Fore.GREEN + "Logged in successfully...")
             return 1
         elif response == "login-account-not-exist":
-            print("Account does not exist...")
+            print(Fore.RED + "Account does not exist...")
             return 0
         elif response == "login-online":
-            print("Account is already online...")
+            print(Fore.RED + "Account is already online...")
             return 2
         elif response == "login-wrong-password":
-            print("Wrong password...")
+            print(Fore.RED + "Wrong password...")
             return 3
     
     # logout function
@@ -467,13 +477,13 @@ class peerMain:
         response = self.tcpClientSocket.recv(1024).decode().split()
         logging.info("Received from " + self.registryName + " -> " + " ".join(response))
         if response[0] == "search-success":
-            print(username + " is found successfully...")
+            print(Fore.GREEN + username + " is found successfully...")
             return response[1]
         elif response[0] == "search-user-not-online":
-            print(username + " is not online...")
+            print(Fore.RED + username + " is not online...")
             return 0
         elif response[0] == "search-user-not-found":
-            print(username + " is not found")
+            print(Fore.RED + username + " is not found")
             return None
     
     # function for sending hello message
