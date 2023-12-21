@@ -308,16 +308,22 @@ class peerMain:
         # log file initialization
         logging.basicConfig(filename="peer.log", level=logging.INFO)
         # as long as the user is not logged out, asks to select an option in the menu
-        while choice != "6":
+        while choice != "3":
             # menu selection prompt
             choice = input("Choose: \nCreate account: 1\nLogin: 2\nLogout: 3\nSearch: 4\nStart a chat: 5\n")
             # if choice is 1, creates an account with the username
             # and password entered by the user
             if choice == "1":
                 username = input("username: ")
-                password = getpass("password: ")
-                
-                self.createAccount(username, password)
+                while True:
+                    password = getpass("password: ")
+                    confirm_password = getpass("Confirm password: ")
+                    if password == confirm_password:
+                        # Passwords match, create account
+                        self.createAccount(username, password)
+                        break  # Exit the loop since passwords match
+                    else:
+                        print("Invalid: Passwords do not match. Please re-enter Password")                
             # if choice is 2 and user is not logged in, asks for the username
             # and the password to login
             elif choice == "2" and not self.isOnline:
@@ -373,15 +379,6 @@ class peerMain:
                     self.peerClient.start()
                     self.peerClient.join()
 
-            elif choice == "6" and self.isOnline:
-                self.logout(1)
-                self.isOnline = False
-                self.loginCredentials = (None, None)
-                self.peerServer.isOnline = False
-                self.peerServer.tcpServerSocket.close()
-                if self.peerClient is not None:
-                    self.peerClient.tcpClientSocket.close()
-
             # if this is the receiver side then it will get the prompt to accept an incoming request during the main loop
             # that's why response is evaluated in main process not the server thread even though the prompt is printed by server
             # if the response is ok then a client is created for this peer with the OK message and that's why it will directly
@@ -420,8 +417,9 @@ class peerMain:
         logging.info("Received from " + self.registryName + " -> " + response)
         if response == "join-success":
             print("Account created...")
+            print("Welcome " + username)
         elif response == "join-exist":
-            print("choose another username or login...")
+            print("choose another username or login as this username already exist...")
 
     # login function
     def login(self, username, password):
