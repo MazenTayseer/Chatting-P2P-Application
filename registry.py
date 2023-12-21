@@ -50,8 +50,15 @@ class ClientThread(threading.Thread):
                     + " -> "
                     + " ".join(message)
                 )
+                if message[0] == "CHECK-USERNAME-EXISTS":
+                    if db.is_account_exist(message[1]):
+                        response = "username-exist"
+                        self.tcpClientSocket.send(response.encode())
+                    else:
+                        response = "username-not-found"
+                        self.tcpClientSocket.send(response.encode())
                 #   JOIN    #
-                if message[0] == "JOIN":
+                elif message[0] == "JOIN":
                     # join-exist is sent to peer,
                     # if an account with this username already exists
                     if db.is_account_exist(message[1]):

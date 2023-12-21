@@ -318,6 +318,9 @@ class peerMain:
             # and password entered by the user
             if choice == "1":
                 username = input(Fore.CYAN + "username: ")
+                if self.checkAccount(username):
+                    continue
+
                 while True:
                     password = getpass("password: ")
                     if len(password) < 8:
@@ -495,5 +498,14 @@ class peerMain:
         self.timer = threading.Timer(1, self.sendHelloMessage)
         self.timer.start()
 
+    def checkAccount(self, username):
+        message = "CHECK-USERNAME-EXISTS " + username
+        self.tcpClientSocket.send(message.encode())
+        response = self.tcpClientSocket.recv(1024).decode()
+        if response == "username-exist":
+            print(Fore.RED + "choose another username or login as this username already exist...")
+            return True
+        else:
+            return False
 # peer is started
 main = peerMain()
