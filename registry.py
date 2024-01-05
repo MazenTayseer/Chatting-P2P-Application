@@ -4,6 +4,10 @@ import select
 import logging
 import db
 from colorama import Fore, init
+from config import*
+
+config1 = AppConfig()
+
 
 # This class is used to process the peer messages sent to registry
 # for each peer connected to registry, a new client thread is created
@@ -93,7 +97,7 @@ class ClientThread(threading.Thread):
                             finally:
                                 self.lock.release()
                     
-                            db.user_login(message[1], self.ip, message[2])
+                            db.user_login(message[1], self.ip, message[3])
                             # login-success is sent to peer,
                             # and a udp server thread is created for this peer, and thread is started
                             # timer thread of the udp server is started
@@ -138,6 +142,8 @@ class ClientThread(threading.Thread):
                         # and sends the related response to peer
                         if db.is_account_online(message[1]):
                             peer_info = db.get_peer_ip_port(message[1])
+                            print("From reg")
+                            print(peer_info)
                             response = "search-success " + peer_info[0] + ":" + peer_info[1]
                             logging.info("Send to " + self.ip + ":" + str(self.port) + " -> " + response) 
                             self.tcpClientSocket.send(response.encode())
@@ -170,6 +176,8 @@ class ClientThread(threading.Thread):
                         # checks if the room exists
                         # and sends the related response to peer
                         id, peers = db.get_room_peers(message[1])
+                        if peers is None or not peers:
+                            peers = []
                         peers.append(message[2])
                         peers = list(set(peers))
                         db.update_room(id, peers)
@@ -245,13 +253,8 @@ db = db.DB()
 # first checks to get it for windows devices
 # if the device that runs this application is not windows
 # it checks to get it for macos devices
-hostname=gethostname()
-try:
-    host=gethostbyname(hostname)
-except gaierror:
-    import netifaces as ni
-    host = ni.ifaddresses('en0')[ni.AF_INET][0]['addr']
 
+host = config1.hostname
 
 print(Fore.MAGENTA +"Registry IP address: " + host)
 print(Fore.MAGENTA +"Registry port number: " + str(port))

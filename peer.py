@@ -5,7 +5,9 @@ import logging
 from getpass4 import getpass
 from colorama import init, Fore
 from utils.message_formatter import *
-import db
+from config import*
+
+config1 = AppConfig()
 # Server side of peer
 class PeerServer(threading.Thread):
 
@@ -46,15 +48,7 @@ class PeerServer(threading.Thread):
         # first checks to get it for windows devices
         # if the device that runs this application is not windows
         # it checks to get it for macos devices
-        hostname=gethostname()
-        try:
-            self.peerServerHostname=gethostbyname(hostname)
-        except gaierror:
-            import netifaces as ni
-            self.peerServerHostname = ni.ifaddresses('en0')[ni.AF_INET][0]['addr']
-
-        # ip address of this peer
-        self.peerServerHostname = 'localhost'
+        self.peerServerHostname =config1.hostname
 
         self.udpServerSocket.bind((self.peerServerHostname, self.roomServerPort))
         
@@ -174,7 +168,7 @@ class PeerServer(threading.Thread):
 # Client side of peer
 class PeerClient(threading.Thread):
     # variable initializations for the client side of the peer
-    def __init__(self, ipToConnect, portToConnect, username, peerServer, responseReceived, flag, room_id ,room_peers : list, registry_name = "127.0.1.1"):
+    def __init__(self, ipToConnect, portToConnect, username, peerServer, responseReceived, flag, room_id ,room_peers : list, registry_name=config1.hostname):
         threading.Thread.__init__(self)
         # keeps the ip address of the peer that this will connect
         # ip address of the registry
@@ -385,7 +379,8 @@ class peerMain:
     # peer initializations
     def __init__(self):
         # ip address of the registry
-        self.registryName = input(Fore.MAGENTA + "Enter IP address of registry: ")
+        self.registryName = config1.hostname
+        #input(Fore.MAGENTA + "Enter IP address of registry: ")
         #self.registryName = '127.0.1.1'
         # port number of the registry
         self.registryPort = 15600
@@ -494,6 +489,9 @@ class peerMain:
                 if searchStatus != None and searchStatus != 0:
                     searchStatus = searchStatus.split(":")
                     self.peerServer.chat = 1
+                    for index, value in enumerate(searchStatus):
+                        print(f"Index {index}: {value}")
+                        
                     self.peerClient = PeerClient(ipToConnect = searchStatus[0], portToConnect = int(searchStatus[1]) , username = self.loginCredentials[0], peerServer = self.peerServer, responseReceived=None ,flag = '5', room_id = None, room_peers = None)
                     self.peerClient.start()
                     self.peerClient.join()
@@ -518,7 +516,7 @@ class peerMain:
 
                 if search_status != 0 and search_status != None:
                     #def __init__(self, ipToConnect, portToConnect, username, peerServer, responseReceived, flag, room_peers : list)
-                    ipToConnect = "192.168.1.5"
+                    ipToConnect = config1.hostname
                     self.peerServer.room = 1
                     self.peerClient = PeerClient(ipToConnect, None, self.loginCredentials[0], self.peerServer, None, '7', room_id ,search_status)
                     self.peerClient.start()
@@ -560,7 +558,7 @@ class peerMain:
         if response == "creation-success":
             print(Fore.GREEN +"Room created...")
         elif response == "room_exist":
-            print(Fore.LIGHTRED_EX+"Room already exits")
+            print(Fore.RED+"Room already exits")
 
     # function for searching an online user
      # function for searching an online user
