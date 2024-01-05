@@ -1,6 +1,6 @@
 import time
 from functools import lru_cache
-
+from colorama import Fore
 from socket import *
 import netifaces as ni
 #from config.logger_config import LoggerConfig
@@ -29,4 +29,5 @@ class AppConfig():
             return fallback_result
         
 obj = AppConfig()
-print(obj.hostname)
+print(Fore.MAGENTA+"The Host Ip address")
+print(Fore.MAGENTA+obj.hostname)
