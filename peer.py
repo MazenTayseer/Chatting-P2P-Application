@@ -563,21 +563,22 @@ class peerMain:
         if choice != "CANCEL":
             self.tcpClientSocket.close()
 
-    
-    def create_room(self, room_id):
-        # join message to create an account is composed and sent to registry
-        # if response is success then informs the user for account creation
-        # if response is exist then informs the user for account existence
-        message = "CREATE " + room_id
-        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
-        self.tcpClientSocket.send(message.encode())
-        response = self.tcpClientSocket.recv(1024).decode()
-        logging.info("Received from " + self.registryName + " -> " + response)
-        if response == "creation-success":
-            print(Fore.GREEN +"Room created Successfully...")
-            return 1
-        elif response == "room_exist":
-            return 0
+    # def check_Account_pass(self,username,password):  
+    #  #to verify password before input of server,room port   
+    # #def create_room(self, room_id):
+    #     # join message to create an account is composed and sent to registry
+    #     # if response is success then informs the user for account creation
+    #     # if response is exist then informs the user for account existence
+    #     message = "CREATE " + room_id
+    #     logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+    #     self.tcpClientSocket.send(message.encode())
+    #     response = self.tcpClientSocket.recv(1024).decode()
+    #     logging.info("Received from " + self.registryName + " -> " + response)
+    #     if response == "creation-success":
+    #         print(Fore.GREEN +"Room created Successfully...")
+    #         return 1
+    #     elif response == "room_exist":
+    #         return 0
 
     # function for searching an online user
      # function for searching an online user
@@ -623,10 +624,13 @@ class peerMain:
         self.tcpClientSocket.send(message.encode())
         response = self.tcpClientSocket.recv(1024).decode()
         logging.info("Received from " + self.registryName + " -> " + response)
-        if response == "NOONLINEPEERS":
+        response_split = response.split()
+        # Find the index of the first element
+        
+        if response_split[0] == "NOONLINEPEERS":
             print(Fore.RED + "There is no Online Peers at the moment , check later")
-            
-        #db.getOnlinePeers(self)
+        else:
+            print(Fore.GREEN + " ".join(response_split))
         
     # account creation function
     def createAccount(self, username, password):

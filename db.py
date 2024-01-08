@@ -64,13 +64,15 @@ class DB:
 
    
     def getOnlinePeers(self):
-        #online_users = self.db.online_peers.find({}, {"username": 1})
-        online_usernames = [user["username"] for user in self.db.online_peers.find({}, {"username": 1})]
-        # Check if there are no online users
-        if not online_usernames:
-            return 0
-        else:
+        online_usernames_cursor = self.db.online_peers.find({},{"username": 1})
+        
+        # Extract usernames from the cursor
+        online_usernames = [user["username"] for user in online_usernames_cursor]
+        # Check for all online users
+        if online_usernames :
             return online_usernames
+        else:
+            return 0
  
  
     # logs in the user
