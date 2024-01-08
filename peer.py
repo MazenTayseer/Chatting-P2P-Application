@@ -469,6 +469,7 @@ class peerMain:
                 print(Fore.GREEN +"Logged out successfully")
             # is peer is not logged in and exits the program
             elif choice == "3":
+                print(Fore.RED +"Exiting Program")
                 self.logout(2)
             # if choice is 4 and user is online, then user is asked
             # for a username that is wanted to be searched
@@ -480,6 +481,10 @@ class peerMain:
                     print("IP address of " + username + " is " + searchStatus)
             # if choice is 5 and user is online, then user is asked
             # to enter the username of the user that is wanted to be chatted
+            
+            elif choice == "4" and not self.isOnline:
+                print(Fore.RED + "You can't Search for a user, you need to log in first")
+            
             elif choice == "5" and self.isOnline:
                 username = input(Fore.CYAN +"Enter the username of user to start chat: ")
                 searchStatus = self.searchUser(username)
@@ -502,17 +507,26 @@ class peerMain:
             # main process waits for the client thread to finish its chat
             elif choice == "5" and not self.isOnline:
                 print(Fore.RED + "You can't chat, you need to log in first")
-            
+                
+            elif choice == "6" and not self.isOnline:
+                print(Fore.RED + "You can't Create a room, you need to log in first")
+                
             elif choice == "6" and self.isOnline:
             #This choice creates a new chatroom and saves it in the database
                 room_id = input(Fore.CYAN +"Enter a Room ID: ")
-                self.create_room(room_id)
-                print(Fore.GREEN +"Room Created Successfully\n")
+                if self.create_room(room_id):
+                    print(Fore.GREEN + "Join the Room now to start chatting with peers")
+                else:
+                    print(Fore.RED + "Room ID already Exist ,Create a room with another ID")
+                            
+                
+            elif choice == "7" and not self.isOnline:
+                print(Fore.RED + "You can't Join a room, you need to log in first")
 
             elif choice == "7" and self.isOnline:
             #This choice joins already existing chatroom
                 room_id = input(Fore.CYAN +"Enter a Room ID: ")
-                search_status = self.search_room(room_id)
+                search_status = self.search_room(room_id)                    
 
                 if search_status != 0 and search_status != None:
                     #def __init__(self, ipToConnect, portToConnect, username, peerServer, responseReceived, flag, room_peers : list)
@@ -521,6 +535,8 @@ class peerMain:
                     self.peerClient = PeerClient(ipToConnect, None, self.loginCredentials[0], self.peerServer, None, '7', room_id ,search_status)
                     self.peerClient.start()
                     self.peerClient.join()
+                else:
+                    print(Fore.RED + "Chat Room does not exist, Try another ID")
 
 
 
@@ -556,9 +572,10 @@ class peerMain:
         response = self.tcpClientSocket.recv(1024).decode()
         logging.info("Received from " + self.registryName + " -> " + response)
         if response == "creation-success":
-            print(Fore.GREEN +"Room created...")
+            print(Fore.GREEN +"Room created Successfully...")
+            return 1
         elif response == "room_exist":
-            print(Fore.RED+"Room already exits")
+            return 0
 
     # function for searching an online user
      # function for searching an online user
@@ -566,44 +583,35 @@ class peerMain:
         # a search message is composed and sent to registry
         # custom value is returned according to each response
         # to this search message
-        message = "JOINROOM " + room_id + " " + str(self.roomServerPort)
-        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
-        self.tcpClientSocket.send(message.encode())
-        response = self.tcpClientSocket.recv(1024).decode()
-
-        # for example "success ['4001', '8001', '3001', '5001']"
-        # list start = 8 which is the index of [
-        # list end =  40 which is the index of ]
-        # list string is extracted using the start and ending list !!!
-        list_start = response.index('[')
-        list_end = response.index(']') + 1
-        list_string = response[list_start:list_end]
-        # converts the extracted String to an actual python list
-        response2 = eval(list_string)
-
-        response = response.split()
-        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
-        if response[0] == "success":
-            print(Fore.GREEN + room_id + " is found successfully...")
-            return response2
-        
-        elif response[0] == "search-fail":
-            print(Fore.LIGHTRED_EX+ room_id + " is not found")
+        if int(room_id) > 0:
+            message = "JOINROOM " + room_id + " " + str(self.roomServerPort)
+            logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+            self.tcpClientSocket.send(message.encode())
+            response = self.tcpClientSocket.recv(1024).decode()
+            
+            response = response.split()
+            logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+            if response[0] == "success":
+                list_start = response.index('[')
+                list_end = response.index(']') + 1
+                list_string = response[list_start:list_end]
+            # converts the extracted String to an actual python list
+                response2 = eval(list_string)
+                print(Fore.GREEN + room_id + " is found successfully...")
+                return response2
+            
+            elif response[0] == "search-fail":
+                print(Fore.RED +"Room : " + room_id + " not found")
+                return 0
+            # for example "success ['4001', '8001', '3001', '5001']"
+            # list start = 8 which is the index of [
+            # list end =  40 which is the index of ]
+            # list string is extracted using the start and ending list !!!
+            
+        else:
+            print(Fore.RED + " Enter a number greater than zero")
             return 0
-
-    # def join_room(self, search_status, port_no):
-    #     if search_status == 0:
-    #         print("Room Not Found!")
-    #     else:
-    #         message = "JOINROOM " + search_status + " " + port_no
-    #         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
-    #         self.tcpClientSocket.send(message.encode())
-    #         response = self.tcpClientSocket.recv(1024).decode()
-    #         if response == 'success':
-    #             print("Joined Room Successfully")
-
-
-
+            
     
     
     # account creation function
