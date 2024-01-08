@@ -590,31 +590,49 @@ class peerMain:
         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
         self.tcpClientSocket.send(message.encode())
         response = self.tcpClientSocket.recv(1024).decode()
-        response = response.split()
-        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
         
         room_check = room_id
-        if int(room_check) > 0:
-            if response[0] == "success":
-                list_start = response.index('[')
-                list_end = response.index(']') + 1
-                list_string = response[list_start:list_end]
-            # converts the extracted String to an actual python list
-                response2 = eval(list_string)
-                print(Fore.GREEN + room_id + " is found successfully...")
-                return response2
-            
-            elif response[0] == "search-fail":
-                print(Fore.RED +"Room : " + room_id + " , not found")
-                return 0
-            # for example "success ['4001', '8001', '3001', '5001']"
-            # list start = 8 which is the index of [
-            # list end =  40 which is the index of ]
-            # list string is extracted using the start and ending list !!!
-            
-        else:
+        if int(room_check) <= 0:
             print(Fore.RED + " Enter a number greater than zero")
             return 0
+        else:
+            list_start = response.index('[')
+            list_end = response.index(']') + 1
+            list_string = response[list_start:list_end]
+            # converts the extracted String to an actual python list
+            response2 = eval(list_string)
+            
+            response = response.split()
+            logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+            if response[0] == "success":
+                print(room_id + " is found successfully...")
+                return response2
+        
+            elif response[0] == "search-fail":
+                print(Fore.RED +"Room : " + room_id + " , not found")
+        #         return 0
+        # room_check = room_id
+        # if int(room_check) > 0:
+        #     if response[0] == "success":
+        #         list_start = response.index('[')
+        #         list_end = response.index(']') + 1
+        #         list_string = response[list_start:list_end]
+        #     # converts the extracted String to an actual python list
+        #         response2 = eval(list_string)
+        #         print(Fore.GREEN + room_id + " is found successfully...")
+        #         return response2
+            
+        #     elif response[0] == "search-fail":
+        #         print(Fore.RED +"Room : " + room_id + " , not found")
+        #         return 0
+        #     # for example "success ['4001', '8001', '3001', '5001']"
+        #     # list start = 8 which is the index of [
+        #     # list end =  40 which is the index of ]
+        #     # list string is extracted using the start and ending list !!!
+            
+        # else:
+        #     print(Fore.RED + " Enter a number greater than zero")
+        #     return 0
             
     
         #function to search all online users

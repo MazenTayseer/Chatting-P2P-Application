@@ -207,8 +207,6 @@ class ClientThread(threading.Thread):
                             self.tcpClientSocket.send(response.encode())
                         else:
                             response = "online Peers: " + ", ".join(allOnlinePeers)
-                            #response = "ONLINEPEERS" + allOnlinePeers
-                            #print (allOnlinePeers)
                             self.tcpClientSocket.send(response.encode())
                     
                 
