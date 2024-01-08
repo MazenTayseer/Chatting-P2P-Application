@@ -50,14 +50,6 @@ class DB:
         else:
             return False
 
-    #def register(self, username, password):
-        #account = {
-        #    "username": username,
-        #    "password": password
-        #}
-        #self.db.accounts.insert_one(account)
-
-
     # retrieves the password for a given username
     def get_password(self, username):
         return self.db.accounts.find_one({"username": username})["password"]
@@ -70,7 +62,17 @@ class DB:
         else:
             return False
 
-    
+   
+    def getOnlinePeers(self):
+        #online_users = self.db.online_peers.find({}, {"username": 1})
+        online_usernames = [user["username"] for user in self.db.online_peers.find({}, {"username": 1})]
+        # Check if there are no online users
+        if not online_usernames:
+            return 0
+        else:
+            return online_usernames
+ 
+ 
     # logs in the user
     def user_login(self, username, ip, port):
         online_peer = {
@@ -146,7 +148,6 @@ class DB:
 def drop_all_records(self):
         self.accounts_collection.delete_many({})
         self.online_peers_collection.delete_many({})
-
 
 # Example usage:
 db = DB()

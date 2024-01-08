@@ -6,6 +6,7 @@ from getpass4 import getpass
 from colorama import init, Fore
 from utils.message_formatter import *
 from config import*
+import db
 
 config1 = AppConfig()
 # Server side of peer
@@ -412,7 +413,7 @@ class peerMain:
         # as long as the user is not logged out, asks to select an option in the menu
         while choice != "3":
             # menu selection prompt
-            choice = input(Fore.BLUE +"Choose: \nCreate account: 1\nLogin: 2\nLogout: 3\nSearch: 4\nStart a chat: 5\nCreate Chatroom: 6\nJoin a room: 7\n")
+            choice = input(Fore.BLUE +"Choose: \nCreate account: 1\nLogin: 2\nLogout: 3\nSearch: 4\nStart a chat: 5\nCreate Chatroom: 6\nJoin a room: 7\nSearch Online Peers: 8\n")
             # if choice is 1, creates an account with the username
             # and password entered by the user
             if choice == "1":
@@ -537,8 +538,9 @@ class peerMain:
                     self.peerClient.join()
                 else:
                     print(Fore.RED + "Chat Room does not exist, Try another ID")
-
-
+            elif choice == "8" and self.isOnline or not self.isOnline:
+                self.get_online_users()
+                
 
             elif choice == "OK" and self.isOnline:
                 okMessage = "OK " + self.loginCredentials[0]
@@ -583,14 +585,15 @@ class peerMain:
         # a search message is composed and sent to registry
         # custom value is returned according to each response
         # to this search message
-        if int(room_id) > 0:
-            message = "JOINROOM " + room_id + " " + str(self.roomServerPort)
-            logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
-            self.tcpClientSocket.send(message.encode())
-            response = self.tcpClientSocket.recv(1024).decode()
-            
-            response = response.split()
-            logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        message = "JOINROOM " + room_id + " " + str(self.roomServerPort)
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+        self.tcpClientSocket.send(message.encode())
+        response = self.tcpClientSocket.recv(1024).decode()
+        response = response.split()
+        logging.info("Received from " + self.registryName + " -> " + " ".join(response))
+        
+        room_check = room_id
+        if int(room_check) > 0:
             if response[0] == "success":
                 list_start = response.index('[')
                 list_end = response.index(']') + 1
@@ -601,7 +604,7 @@ class peerMain:
                 return response2
             
             elif response[0] == "search-fail":
-                print(Fore.RED +"Room : " + room_id + " not found")
+                print(Fore.RED +"Room : " + room_id + " , not found")
                 return 0
             # for example "success ['4001', '8001', '3001', '5001']"
             # list start = 8 which is the index of [
@@ -613,7 +616,18 @@ class peerMain:
             return 0
             
     
-    
+        #function to search all online users
+    def get_online_users(self):
+        message = "SEARCHONLINEPEERS "
+        logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
+        self.tcpClientSocket.send(message.encode())
+        response = self.tcpClientSocket.recv(1024).decode()
+        logging.info("Received from " + self.registryName + " -> " + response)
+        if response == "NOONLINEPEERS":
+            print(Fore.RED + "There is no Online Peers at the moment , check later")
+            
+        #db.getOnlinePeers(self)
+        
     # account creation function
     def createAccount(self, username, password):
         # join message to create an account is composed and sent to registry
@@ -651,10 +665,7 @@ class peerMain:
         elif response == "login-wrong-password":
             print(Fore.RED + "Wrong password...")
             return 3
-        
-    # login function
-   
-    
+            
     # logout function
     def logout(self, option):
         # a logout message is composed and sent to registry
@@ -667,7 +678,6 @@ class peerMain:
         logging.info("Send to " + self.registryName + ":" + str(self.registryPort) + " -> " + message)
         self.tcpClientSocket.send(message.encode())
         
-
     # function for searching an online user
     def searchUser(self, username):
         # a search message is composed and sent to registry

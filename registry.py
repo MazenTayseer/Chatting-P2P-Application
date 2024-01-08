@@ -200,6 +200,16 @@ class ClientThread(threading.Thread):
                         db.remove_peer(message[1], message[2])
                         response = "SUCCESS"
                         self.tcpClientSocket.send(response.encode())
+                elif message[0] == "SEARCHONLINEPEERS":
+                        allOnlinePeers = db.getOnlinePeers()
+                        if allOnlinePeers == 0 :
+                            response = "NOONLINEPEERS"
+                            self.tcpClientSocket.send(response.encode())
+                        else:
+                            response = "ONLINEPEERS"
+                            print ([user["username"] for user in allOnlinePeers] )
+                            self.tcpClientSocket.send(response.encode())
+                    
                 
             except OSError as oErr:
                 logging.error("OSError: {0}".format(oErr)) 
